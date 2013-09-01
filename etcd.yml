@@ -1,0 +1,49 @@
+---
+- name: Set up etcd
+  hosts: vagrant
+  user: vagrant
+  vars:
+    etcd:
+      version: 0.1.1
+  tasks:
+    - name: Install prereqs
+      apt: package={{ item }} state=present
+      with_items:
+        - software-properties-common
+        - python-software-properties
+
+    - name: Update apt repos
+      command: add-apt-repository ppa:duh/golang
+
+    - name: Install go
+      apt: package=golang state=present
+           update_cache=yes
+
+    - name: Clone etcd
+      get_url: url=https://github.com/coreos/etcd/releases/download/v{{ etcd.version }}/etcd-v{{ etcd.version }}-Linux.tar.gz
+               dest=/usr/local/src/etcd-v{{ etcd.version }}-Linux.tar.gz
+
+    - name: Extract etcd
+      command: chdir=/usr/local/src
+               tar xzf etcd-v{{ etcd.version }}-Linux.tar.gz
+               creates=/usr/local/src/etcd-v{{ etcd.version }}/etcd
+
+    - name: Move etcd to /usr/bin
+      command: cp /usr/local/src/etcd-v{{ etcd.version }}/{{ item }} /usr/bin/{{ item }}
+      with_items:
+        - etcd
+        - etcdctl
+
+    - name: Create data directory
+      file: path=/var/data/etcd
+            state=directory
+
+    - name: Copy init script for etcd server
+      template: src=etcd.conf.j2
+                dest=/etc/init/etcd.conf
+
+    - name: Add ufw rule for the server port
+      command: ufw allow 7001
+
+    - name: Start etcd
+      command: start etcd

@@ -1,5 +1,6 @@
 ---
-- hosts: vagrant
+- name: Set up nginx
+  hosts: vagrant
   user: vagrant
   tasks:
     - name: Install nginx
