@@ -1,0 +1,59 @@
+---
+- hosts: vagrant
+  user: vagrant
+  tasks:
+    - name: Install nginx
+      apt: pkg=nginx state=present update_cache=yes
+
+    - name: Set up nginx config directory
+      file: path=/etc/nginx/{{ item }}
+            state=directory
+      with_items:
+        - sites-available
+        - sites-enabled
+
+    - name: Generate the nginx configuration file
+      copy: src=files/nginx.conf
+            dest=/etc/nginx/nginx.conf
+
+    - name: Deactivate the default nginx site
+      file: path=/etc/nginx/sites-enabled/default
+            state=absent
+
+    - name: Generate the stub_status site config
+      copy: src=files/nginx.status.conf
+            dest=/etc/nginx/sites-available/status
+
+    - name: Activate the stub_status site
+      file: src=/etc/nginx/sites-available/status
+            dest=/etc/nginx/sites-enabled/status
+            state=link
+
+    - name: Add site for the app under development
+      when: app is defined
+      template: src=templates/nginx.site.conf.j2
+                dest=/etc/nginx/sites-available/site
+
+    - name: Activate the app
+      when: app is defined
+      file: src=/etc/nginx/sites-available/site
+            dest=/etc/nginx/sites-enabled/site
+            state=link
+
+    - name: Configure log rotation
+      copy: src=files/nginx.logrotate
+            dest=/etc/logrotate.d/nginx
+
+    - name: Copy nginx init script
+      sudo: yes
+      copy: src=files/nginx.upstart
+            dest=/etc/init/nginx.conf
+            mode=755
+
+    - name: Add ufw rule
+      sudo: yes
+      command: ufw allow 80,443/tcp
+      # Note: ufw isn't enabled at this point
+
+    - name: Start nginx
+      command: start nginx
