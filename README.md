@@ -9,3 +9,5 @@ config.vm.provision :ansible do |ansible|
   ansible.inventory_file = "ansible_hosts"
 end
 ```
+
+**Note** Vagrant 1.2.7 currently reports successful Ansible runs as failures. Vagrant's master branch has a fix, but it won't be released for a bit.
