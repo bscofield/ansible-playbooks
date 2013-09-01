@@ -7,13 +7,13 @@
       version: 0.1.1
   tasks:
     - name: Install prereqs
-      apt: package={{ item }} state=present
+      apt: package={{ item }} state=present update_cache=yes
       with_items:
         - software-properties-common
         - python-software-properties
 
     - name: Update apt repos
-      command: add-apt-repository ppa:duh/golang
+      apt_repository: repo="ppa:duh/golang" state=present
 
     - name: Install go
       apt: package=golang state=present
@@ -39,7 +39,7 @@
             state=directory
 
     - name: Copy init script for etcd server
-      template: src=etcd.conf.j2
+      template: src=templates/etcd.upstart.j2
                 dest=/etc/init/etcd.conf
 
     - name: Add ufw rule for the server port

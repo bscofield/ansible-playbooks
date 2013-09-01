@@ -1,15 +1,15 @@
 server {
-  listen  		*:80;
+  listen      *:80;
 
   server_name {{ app }};
-  root 				/var/www/{{ app }};
+  root        /var/www/{{ app }};
 
-  access_log 	/var/log/nginx/{{ app }}.log;
+  access_log  /var/log/nginx/{{ app }}.log;
 
   client_max_body_size 10000k;
 
   location / {
-		root 			/var/www/{{ app }};
-    index  		index.html;
+    root      /var/www/{{ app }};
+    index     index.html;
   }
 }
