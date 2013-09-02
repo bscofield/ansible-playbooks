@@ -1,0 +1,52 @@
+---
+- name: Install Ruby
+  hosts: vagrant
+  user: vagrant
+  vars:
+    ruby_version: 2.0.0-p247
+  tasks:
+    - name: Install required packages
+      apt: pkg={{item}} state=installed
+      with_items:
+        - build-essential
+        - libssl-dev
+        - zlib1g-dev
+        - libreadline-dev
+        - libyaml-dev
+        - git-core
+
+    - name: Remove system Ruby
+      file: path=/opt/vagrant_ruby
+            state=absent
+
+    - name: Create src directory
+      file: path=/usr/local/src
+            state=directory
+
+    - name: Download Ruby {{ ruby_version }}
+      get_url: url=http://ftp.ruby-lang.org/pub/ruby/2.0/ruby-{{ ruby_version }}.tar.gz
+               dest=/usr/local/src/ruby.tgz
+
+    - name: Expand Ruby
+      command: chdir=/usr/local/src
+               tar zxf ruby.tgz
+               creates=/usr/local/src/ruby-{{ ruby_version }}
+
+    - name: Build Ruby
+      command: chdir=/usr/local/src/ruby-{{ ruby_version }}
+               {{ item }}
+      with_items:
+        - ./configure --disable-install-rdoc
+        - make
+        - sudo make install
+
+    - name: Update Rubygems
+      command: gem update --system
+
+    - name: Copy no-documentation gemrc
+      copy: src=gemrc
+            dest=/etc/gemrc
+
+    - name: Install Bundler
+      gem: name=bundler
+           state=present
