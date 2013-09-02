@@ -44,7 +44,7 @@
       command: gem update --system
 
     - name: Copy no-documentation gemrc
-      copy: src=gemrc
+      copy: src=files/gemrc
             dest=/etc/gemrc
 
     - name: Install Bundler
