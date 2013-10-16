@@ -1,0 +1,16 @@
+---
+- name: Set up logstash
+  hosts: 127.0.0.1
+  connection: local
+  user: vagrant
+  tasks:
+    - name: Install Java
+      apt: pkg=default-jre state=present
+
+    - name: Prep destination
+      sudo: yes
+      file: path=/var/logstash state=directory owner=vagrant
+
+    - name: Download logstash
+      get_url: url=https://download.elasticsearch.org/logstash/logstash/logstash-1.2.1-flatjar.jar
+               dest=/var/logstash/logstash-1.2.1-flatjar.jar

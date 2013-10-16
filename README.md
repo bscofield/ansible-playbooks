@@ -6,8 +6,6 @@ For example, I've got a VM that just needs nginx (it's for the development of an
 config.vm.provision :ansible do |ansible|
   ansible.sudo = true
   ansible.playbook = "~/Projects/ansible/nginx.yml"
-  ansible.inventory_file = "ansible_hosts"
+  ansible.inventory_path = "ansible_hosts"
 end
 ```
-
-**Note** Vagrant 1.2.7 currently reports successful Ansible runs as failures. Vagrant's master branch has a fix, but it won't be released for a bit.
